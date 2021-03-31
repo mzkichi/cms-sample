@@ -45,7 +45,11 @@
                             </li>
                             @if (Route::has('register'))
                                 <li class="nav-item">
+                                    @isset($authgroup)
+                                    <a class="nav-link" href='{{ url("register/$authgroup") }}'>{{ __('Register') }}</a>
+                                    @else
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                    @endisset
                                 </li>
                             @endif
                         @else
