@@ -13,6 +13,9 @@
 Route::get('/', 'User\HomeController@index')->name('home');
 Route::get('/admin', 'Admin\HomeController@index')->name('admin-home');
 
+Route::get('/detail', 'User\DetailController@index')->name('admin-order');
+Route::get('/order/admin', 'Admin\OrderController@index')->name('admin-order');
+
 Auth::routes();
 
 Route::get('/login/admin', 'Auth\LoginController@showAdminLoginForm');

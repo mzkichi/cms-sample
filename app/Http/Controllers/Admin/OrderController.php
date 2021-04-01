@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\TGood;
 
-class HomeController extends Controller
+class OrderController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -27,7 +26,7 @@ class HomeController extends Controller
     {
         $sort = $request->sort;
         if (is_null($sort)) {
-            $sort = 'id';
+            $sort = 't_orders.id';
         }
 
         $orderby = $request->orderby;
@@ -35,29 +34,18 @@ class HomeController extends Controller
             $orderby = 'asc';
         }
 
-        $goods_list = \DB::table('t_goods')
-            //TODO ログインユーザーに紐づくレコードを取得
+        $orders_list = \DB::table('t_orders')
             //->sortable()
-            ->where('user_id', 1)
+            ->join('t_goods', 't_goods.id', '=', 't_orders.goods_id')
             ->orderBy($sort, $orderby)
+            //TODO 外す方法を考える
+            ->limit(1000)
             ->paginate(15);
 
-        $tag_list = array();
-        foreach($goods_list as $goods) {
-            $tag_list[$goods->id] = array();
-            $tags = \DB::table('t_tags')
-                ->where('goods_id', $goods->id)
-                ->get();
-            
-            foreach($tags as $tag) {
-                array_push($tag_list[$goods->id], \DB::table('m_tags')->where('id', $tag->tag_id)->find(1));
-            }
-        }
         $param = [
-            'goods_list' => $goods_list,
-            'tag_list'=>$tag_list,
+            'orders_list' => $orders_list,
             'sort' => $sort
         ];
-        return view('admin.home', $param);
+        return view('admin.order', $param);
     }
 }

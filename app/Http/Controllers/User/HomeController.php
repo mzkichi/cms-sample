@@ -22,24 +22,46 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        $goods_list = \DB::table('t_goods')
-            //TODO ページネーションを実装したら外す
-            ->limit(20)
-            ->get();
+        // パラメータ取得
+        $sort = $request->sort;
+        if (is_null($sort)) {
+            $sort = 'id';
+        }
 
+        $orderby = $request->orderby;
+        if (is_null($orderby)) {
+            $orderby = 'asc';
+        }
+
+        $keyword = $request->keyword;
+        $tag = $request->tag;
+
+        // 商品検索
+        $query = \DB::table('t_goods');
+
+        if(isset($keyword)) {
+            $query = $query
+                ->where('name', 'like', '%' . $keyword .'%')
+                ->orWhere('notice', 'like', '%' . $keyword .'%');
+        }
+
+        $goods_list = $query
+            ->orderBy($sort, $orderby)
+            ->paginate(15);
+
+        // タグ検索
         $tag_list = array();
         foreach($goods_list as $goods) {
             $tag_list[$goods->id] = array();
-            $tags = \DB::table('t_tags')
-                ->where('goods_id', $goods->id)
-                ->get();
+            $tags = \DB::table('t_tags')->where('goods_id', $goods->id)->get();
             
             foreach($tags as $tag) {
                 array_push($tag_list[$goods->id], \DB::table('m_tags')->where('id', $tag->tag_id)->find(1));
             }
         }
+
         return view('user.home', ['goods_list'=>$goods_list, 'tag_list'=>$tag_list]);
     }
 }
